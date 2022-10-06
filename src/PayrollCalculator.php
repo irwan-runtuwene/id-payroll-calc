@@ -234,6 +234,9 @@ class PayrollCalculator
         } else {
             // jika permanent employee
 
+            // print_r($this->provisions->company);
+            // die;
+
             if ($this->provisions->company->calculateBPJSKesehatan === true) {
                 // Calculate BPJS Kesehatan Allowance & Deduction
                 if ($this->result->earnings->gross < $this->provisions->company->highestWageBPJSKesehatan) {
@@ -353,10 +356,18 @@ class PayrollCalculator
 
             //   - $monthlyPositionTax
 
-            if ($this->result->earnings->base < $this->provisions->company->highestWageBPJSKesehatan) {
-                $this->employee->deductions->BPJSKesehatan = $this->result->earnings->base * (1 / 100);
+            if( $this->provisions->company->calculateBPJSKesehatan ){
+
+                if ($this->result->earnings->base < $this->provisions->company->highestWageBPJSKesehatan) {
+                    $this->employee->deductions->BPJSKesehatan = $this->result->earnings->base * (1 / 100);
+                } else {
+                    $this->employee->deductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
+                }
+
             } else {
-                $this->employee->deductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
+
+                    $this->employee->deductions->BPJSKesehatan = 0;
+
             }
 
 
