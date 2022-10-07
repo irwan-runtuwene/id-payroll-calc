@@ -191,7 +191,7 @@ class PayrollCalculator
 
         if ($this->employee->permanentStatus === false) {
             $this->company->allowances->BPJSKesehatan = 0;
-            $this->employee->deductions->BPJSKesehatan = 0;
+            $this->employee->nonTaxDeductions->BPJSKesehatan = 0;
 
             $this->employee->allowances->JKK = 0;
             $this->employee->allowances->JKM = 0;
@@ -207,6 +207,7 @@ class PayrollCalculator
             $this->result->offsetSet('bonus', $this->employee->bonus);
             $this->result->offsetSet('deductions', $this->employee->deductions);
             $this->result->offsetSet('nonTaxAllowances', $this->employee->nonTaxAllowances);
+            $this->result->offsetSet('nonTaxDeductions', $this->employee->nonTaxDeductions);
             $this->result->offsetSet('loans', $this->employee->loans);
 
             // print_r($this->result->allowances); die;
@@ -251,7 +252,7 @@ class PayrollCalculator
 
                 // Maximum number of dependents family is 5
                 if ($this->employee->numOfDependentsFamily > 5) {
-                    $this->employee->deductions->BPJSKesehatan = $this->employee->deductions->BPJSKesehatan + ($this->employee->deductions->BPJSKesehatan * ($this->employee->numOfDependentsFamily - 5));
+                    $this->employee->nonTaxDeductions->BPJSKesehatan = $this->employee->nonTaxDeductions->BPJSKesehatan + ($this->employee->nonTaxDeductions->BPJSKesehatan * ($this->employee->numOfDependentsFamily - 5));
                 }
             }
 
@@ -359,14 +360,14 @@ class PayrollCalculator
             if( $this->provisions->company->calculateBPJSKesehatan ){
 
                 if ($this->result->earnings->base < $this->provisions->company->highestWageBPJSKesehatan) {
-                    $this->employee->deductions->BPJSKesehatan = $this->result->earnings->base * (1 / 100);
+                    $this->employee->nonTaxDeductions->BPJSKesehatan = $this->result->earnings->base * (1 / 100);
                 } else {
-                    $this->employee->deductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
+                    $this->employee->nonTaxDeductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
                 }
 
             } else {
 
-                    $this->employee->deductions->BPJSKesehatan = 0;
+                    $this->employee->nonTaxDeductions->BPJSKesehatan = 0;
 
             }
 
@@ -383,7 +384,6 @@ class PayrollCalculator
             // biaya jabatan , jHT, jip = pengurang
             // echo $this->result->earnings->base + $this->result->allowances->getSum();
             $this->result->earnings->nett_tax = $this->result->earnings->nett - ( $this->result->deductions->JHT + $this->result->deductions->JIP + $monthlyPositionTax );
-            //  $this->result->earnings->base + $this->result->allowances->getSum() - ;
             
             // print_r($monthlyPositionTax + $this->result->deductions->JHT + $this->result->deductions->JIP);
 
@@ -391,11 +391,12 @@ class PayrollCalculator
             // print_r($this->result->earnings->nett); die;
 
             // $grossPlusBPJS = $this->result->earnings->base + $this->result->allowances->getSum();
-            
+            $monthlyPositionTax = ($this->result->earnings->nett_tax) * (5/100) >= 500000 ? 500000 : $this->result->earnings->nett_tax * (5/100);
 
             
             $this->result->earnings->gaji_plus_tunjangan = $this->employee->allowances->getSum();
-            $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett_tax )  * 12 );
+            // $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett_tax )  * 12 );
+            $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett_tax - $monthlyPositionTax )  * 12 );
 
             $this->result->offsetSet('taxable', (new Pph21($this))->calculate());
             $this->result->offsetSet('company', $this->company->allowances);
@@ -427,7 +428,7 @@ class PayrollCalculator
                     // print_r($this->result->earnings->base + $this->employee->allowances['tunjanganMakan'] + $this->employee->allowances['transport'] + $this->employee->allowances['pulsa']);
                     $penambah = ($this->result->earnings->base + $this->employee->allowances['tunjanganMakan'] + $this->employee->allowances['transport'] + $this->employee->allowances['pulsa'] + $this->employee->nonTaxAllowances->fasilitas);
                     
-                    $pengurang = ($this->employee->deductions->JIP + $this->employee->deductions->JHT + $this->result->taxable->liability->monthly + $this->employee->loans->getSum());
+                    $pengurang = ($this->employee->nonTaxDeductions->BPJSKesehatan + $this->employee->deductions->JIP + $this->employee->deductions->JHT + $this->result->taxable->liability->monthly + $this->employee->loans->getSum());
                     
                     $this->result->takeHomePay = $penambah - $pengurang;
 
