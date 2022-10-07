@@ -96,8 +96,8 @@ class Pph21 extends AbstractPph
                         if($this->result->pkp > 60000000 and $this->result->pkp <= 250000000){
                             $pot = ( $this->result->pkp - 60000000 ) * ( 15 / 100 );
                         } else {
-                            // $pot = 190000000  * ( 15 / 100 );
-                            $pot = 200000000  * ( 15 / 100 );
+                            $pot = 190000000  * ( 15 / 100 );
+                            // $pot = 200000000  * ( 15 / 100 );
                         }
                         $progresif[] = $pot;
                         $potongan += $pot;
