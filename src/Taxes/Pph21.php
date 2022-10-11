@@ -137,7 +137,7 @@ class Pph21 extends AbstractPph
                         $potongan += $pot;
                     }
                 }
-                print_r($progresif); die();
+
                 $this->result->liability->annual = $potongan;
 
                 // print_r( $this->getRate($this->calculator->result->earnings->annualy->nett) ); die;
