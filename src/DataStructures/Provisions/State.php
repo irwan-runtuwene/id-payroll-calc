@@ -127,6 +127,11 @@ class State
 
     // ------------------------------------------------------------------------
 
+    // public function getPtkpType('TK/1')
+    // {
+    //     return 
+    // }
+
     /**
      * State::getPtkp
      *
@@ -160,19 +165,23 @@ class State
      *
      * @return float
      */
-    public function getPtkpAmount($numOfDependentsFamily, $married = false)
+    public function getPtkpAmount($type)
     {
-        if ($numOfDependentsFamily >= 3) {
-            return $this->listOfPTKP[ 'K/3' ];
-        } elseif ($numOfDependentsFamily == 2) {
-            return $this->listOfPTKP[ 'K/2' ];
-        } elseif ($numOfDependentsFamily == 1) {
-            return $this->listOfPTKP[ 'K/1' ];
-        } elseif ($married !== false) {
-            return $this->listOfPTKP[ 'K/0' ];
-        }
+        // if ($numOfDependentsFamily >= 3) {
+        //     return $this->listOfPTKP[ 'K/3' ];
+        // } elseif ($numOfDependentsFamily == 2) {
+        //     return $this->listOfPTKP[ 'K/2' ];
+        // } elseif ($numOfDependentsFamily == 1) {
+        //     return $this->listOfPTKP[ 'K/1' ];
+        // } elseif ($married !== false) {
+        //     return $this->listOfPTKP[ 'K/0' ];
+        // }
 
-        return $this->listOfPTKP[ 'TK/0' ];
+        if(isset( $this->listOfPTKP[ $type ] ) && $this->listOfPTKP[ $type ] > 0 ){
+            return $this->listOfPTKP[ $type ];
+        } else {
+            return $this->listOfPTKP[ 'TK/0' ];
+        }
     }
 
     // ------------------------------------------------------------------------
