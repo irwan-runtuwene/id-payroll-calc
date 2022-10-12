@@ -215,6 +215,7 @@ class PayrollCalculator
             $this->result->earnings->nett = $this->result->earnings->gross + $this->result->allowances->getSum() - $this->result->deductions->getSum();
             $this->result->earnings->annualy->nett = $this->result->earnings->nett * 12;
 
+
             $this->result->offsetSet('taxable', (new Pph21($this))->result);
 
             // Pengurangan Penalty
@@ -375,15 +376,47 @@ class PayrollCalculator
             // print_r($this->result->deductions);
 
             
+            // print_r($this->result->allowances); die;
+
+            // total tunjangan
+            $totalTunjangan = $this->employee->allowances['tunjanganMakan'] + $this->employee->allowances['transport'] + $this->employee->allowances['pulsa'] + $this->employee->allowances['lain-lain'] + $this->employee->nonTaxAllowances->fasilitas;
+            
+            $totalGaji = $this->result->earnings->base + $totalTunjangan - $this->employee->nonTaxAllowances->fasilitas;
             
 
-            
-            $this->result->earnings->nett = $this->result->earnings->base + $this->result->allowances->getSum() - $this->result->deductions->getSum();
-            $monthlyPositionTax = ($this->result->earnings->nett) * (5/100) >= 500000 ? 500000 : $this->result->earnings->nett * (5/100);
+
+            // print_r([
+            //     $totalTunjangan,
+            //     $totalGaji
+            // ]
+            // ); die;
+
+            $nett = $this->result->earnings->base + $this->result->allowances->getSum(); // AE
+            $monthlyPositionTax = ($nett) * (5/100) >= 500000 ? 500000 : $nett * (5/100);
             $this->result->earnings->monthlyPositionTax = $monthlyPositionTax;
+
+            $this->result->earnings->nett = $nett - $monthlyPositionTax - $this->result->deductions->getSum(); // AK21
+            $this->result->earnings->nettFacility = $this->result->earnings->nett + $this->employee->nonTaxAllowances->fasilitas; // AK21
+            $this->result->earnings->total_base =  $this->result->earnings->base + ( $this->result->allowances->getSum() - $this->result->allowances->BPJSKesehatan -  $this->result->allowances->JKM -  $this->result->allowances->JIP -  $this->result->allowances->JHT -  $this->result->allowances->JKK ) ;
+            // print_r($this->result->earnings->total_base); die;
+            $this->result->earnings->gross = $this->result->earnings->total_base + $this->company->allowances->BPJSKesehatan +  $this->company->allowances->JKK + $this->company->allowances->JKM + $this->company->allowances->JHT + $this->company->allowances->JIP;
+            $this->result->earnings->grossFacility = $this->result->earnings->total_base + $this->company->allowances->BPJSKesehatan +  $this->company->allowances->JKK + $this->company->allowances->JKM + $this->company->allowances->JHT + $this->company->allowances->JIP + $this->employee->nonTaxAllowances->fasilitas; //
             // biaya jabatan , jHT, jip = pengurang
+
+            // print_r([
+            //     $monthlyPositionTax,
+            //     // $this->result->earnings->base,
+            //     // $this->result->earnings->gross,
+            //     $this->result->earnings->base + $this->result->allowances->getSum(),
+            //     // $this->result->deductions,
+            //     $nett,
+            //     $this->result->earnings->nett,
+            //     $this->result->earnings->monthlyPositionTax
+            // ]); die;
             // echo $this->result->earnings->base + $this->result->allowances->getSum();
-            $this->result->earnings->nett_tax = $this->result->earnings->nett - ( $this->result->deductions->JHT + $this->result->deductions->JIP + $monthlyPositionTax );
+            // $this->result->earnings->nett_tax = $this->result->earnings->nett - ( $this->result->deductions->JHT + $this->result->deductions->JIP);
+
+            
             
             // print_r($monthlyPositionTax + $this->result->deductions->JHT + $this->result->deductions->JIP);
 
@@ -391,15 +424,20 @@ class PayrollCalculator
             // print_r($this->result->earnings->nett); die;
 
             // $grossPlusBPJS = $this->result->earnings->base + $this->result->allowances->getSum();
-            $monthlyPositionTax = ($this->result->earnings->nett_tax) * (5/100) >= 500000 ? 500000 : $this->result->earnings->nett_tax * (5/100);
+            // $monthlyPositionTax = ($this->result->earnings->nett_tax) * (5/100) >= 500000 ? 500000 : $this->result->earnings->nett_tax * (5/100);
 
             
             $this->result->earnings->gaji_plus_tunjangan = $this->employee->allowances->getSum();
             // $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett_tax )  * 12 );
-            $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett_tax - $monthlyPositionTax )  * 12 );
+            $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett)  * 12 );
+            $this->result->earnings->annualy->nettFacility = round( ( $this->result->earnings->nettFacility)  * 12 );
+
+
+            
 
             $this->result->offsetSet('taxable', (new Pph21($this))->calculate());
             $this->result->offsetSet('company', $this->company->allowances);
+
 
             // Pengurangan Penalty
             $this->employee->deductions->offsetSet('penalty', new SplArrayObject([
@@ -426,10 +464,12 @@ class PayrollCalculator
                 case self::GROSS_CALCULATION:
                     // bas + makan , transport, pulsa bpjs kes jkk jkn jht jip - jht jip bjps kes
                     // print_r($this->result->earnings->base + $this->employee->allowances['tunjanganMakan'] + $this->employee->allowances['transport'] + $this->employee->allowances['pulsa']);
-                    $penambah = ($this->result->earnings->base + $this->employee->allowances['tunjanganMakan'] + $this->employee->allowances['transport'] + $this->employee->allowances['pulsa'] + $this->employee->nonTaxAllowances->fasilitas);
+                    $penambah = ($this->result->earnings->base + $this->employee->allowances['tunjanganMakan'] + $this->employee->allowances['transport'] + $this->employee->allowances['pulsa'] + $this->employee->allowances['lain-lain'] + $this->employee->nonTaxAllowances->fasilitas);
                     
                     $pengurang = ($this->employee->nonTaxDeductions->BPJSKesehatan + $this->employee->deductions->JIP + $this->employee->deductions->JHT + $this->result->taxable->liability->monthly + $this->employee->loans->getSum());
                     
+                    // print_r($pengurang); die; 
+
                     $this->result->takeHomePay = $penambah - $pengurang;
 
                     $this->result->deductions->offsetSet('positionTax', $monthlyPositionTax);
