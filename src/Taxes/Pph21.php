@@ -35,7 +35,7 @@ class Pph21 extends AbstractPph
          // base + total allowences
         if($this->calculator->result->earnings->nett > 4500000) {
             // Annual PTKP base on number of dependents family
-            $this->result->ptkp->amount = $this->calculator->provisions->state->getPtkpAmount($this->calculator->employee->numOfDependentsFamily, $this->calculator->employee->maritalStatus);
+            $this->result->ptkp->amount = $this->calculator->provisions->state->getPtkpAmount($this->calculator->employee->ptkpType);
 
             // print_r( $this->result->ptkp->amount ); die;
 
