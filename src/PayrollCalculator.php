@@ -431,8 +431,6 @@ class PayrollCalculator
             // $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett_tax )  * 12 );
             $this->result->earnings->annualy->nett = round( ( $this->result->earnings->nett)  * 12 );
             $this->result->earnings->annualy->nettFacility = round( ( $this->result->earnings->nettFacility)  * 12 );
-
-
             
 
             $this->result->offsetSet('taxable', (new Pph21($this))->calculate());
@@ -474,6 +472,7 @@ class PayrollCalculator
 
                     $this->result->deductions->offsetSet('positionTax', $monthlyPositionTax);
                     $this->result->deductions->offsetSet('pph21Tax', $this->result->taxable->liability->monthly);
+                    $this->result->deductions->offsetSet('BPJSKesehatan', $this->employee->nonTaxDeductions->BPJSKesehatan);
                     break;
                 // Pajak ditanggung oleh perusahaan sebagai tunjangan pajak.
                 case self::GROSS_UP_CALCULATION:
