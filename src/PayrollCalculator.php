@@ -257,6 +257,9 @@ class PayrollCalculator
                 }
             }
 
+            // jika bpjs tk dihitung maka masuk logic ini
+            if ($this->provisions->company->calculateBPJSKetenagakerjaan === true) {
+
             if ($this->provisions->company->JKK === true) {
                 if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
 
@@ -305,6 +308,19 @@ class PayrollCalculator
                     $this->employee->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
                     $this->employee->deductions->JIP = ( $this->provisions->state->highestWage * (1 / 100) );
                 }
+            }
+
+            } else {
+                $this->company->allowances->JKK = 0;
+                $this->employee->allowances->JKK = 0;
+                $this->company->allowances->JKM = 0;
+                $this->employee->allowances->JKM = 0;
+                $this->employee->allowances->JHT = 0;
+                $this->company->allowances->JHT = 0;
+                $this->employee->deductions->JHT = 0;
+                $this->employee->allowances->JIP = 0;
+                $this->company->allowances->JIP = 0;
+                $this->employee->deductions->JIP = 0;
             }
 
 
