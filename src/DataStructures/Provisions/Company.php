@@ -70,6 +70,13 @@ class Company
     public $calculateBPJSKesehatan = true;
 
     /**
+     * Company::$calculateBPJSKesehatan
+     *
+     * @var bool
+     */
+    public $calculateBPJSKetenagakerjaan = true;
+
+    /**
      * Company::$JKK
      * 
      * @var bool 
@@ -124,4 +131,11 @@ class Company
      * @var int
      */
     public $highestWageBPJSKesehatan = 0;
+
+    /**
+     * Company::$highestWageBPJSKetenagakerjaan
+     *
+     * @var int
+     */
+    public $highestWageBPJSKetenagakerjaan = 0;
 }
