@@ -240,16 +240,30 @@ class PayrollCalculator
             // die;
 
             if ($this->provisions->company->calculateBPJSKesehatan === true) {
-                // Calculate BPJS Kesehatan Allowance & Deduction
-                if ($this->result->earnings->gross < $this->provisions->company->highestWageBPJSKesehatan) {
-                    $this->company->allowances->BPJSKesehatan = ( $this->result->earnings->gross * (4 / 100)) ;
-                    $this->employee->allowances->BPJSKesehatan = ( $this->result->earnings->gross * (4 / 100)) ;
-                } else {
-                    $this->company->allowances->BPJSKesehatan = 
+
+                if($this->employee->prorate === true){
+                    if ($this->employee->gapok < $this->provisions->company->highestWageBPJSKesehatan) {
+                        $this->company->allowances->BPJSKesehatan = ( $this->employee->gapok * (4 / 100)) ;
+                        $this->employee->allowances->BPJSKesehatan = ( $this->employee->gapok * (4 / 100)) ;
+                    } else {
+                        $this->company->allowances->BPJSKesehatan = 
                         $this->provisions->company->highestWageBPJSKesehatan * (4 / 100);
-                    $this->employee->allowances->BPJSKesehatan = 
+                        $this->employee->allowances->BPJSKesehatan = 
                         $this->provisions->company->highestWageBPJSKesehatan * (4 / 100);
+                    }
+                }else{
+                    // Calculate BPJS Kesehatan Allowance & Deduction
+                    if ($this->result->earnings->gross < $this->provisions->company->highestWageBPJSKesehatan) {
+                        $this->company->allowances->BPJSKesehatan = ( $this->result->earnings->gross * (4 / 100)) ;
+                        $this->employee->allowances->BPJSKesehatan = ( $this->result->earnings->gross * (4 / 100)) ;
+                    } else {
+                        $this->company->allowances->BPJSKesehatan = 
+                            $this->provisions->company->highestWageBPJSKesehatan * (4 / 100);
+                        $this->employee->allowances->BPJSKesehatan = 
+                            $this->provisions->company->highestWageBPJSKesehatan * (4 / 100);
+                    }
                 }
+                
 
                 // Maximum number of dependents family is 5
                 if ($this->employee->numOfDependentsFamily > 5) {
@@ -261,53 +275,117 @@ class PayrollCalculator
             if ($this->provisions->company->calculateBPJSKetenagakerjaan === true) {
 
             if ($this->provisions->company->JKK === true) {
-                if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
 
-                    $this->company->allowances->JKK = ( $this->result->earnings->gross * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+                if($this->employee->prorate === true){
 
-                    $this->employee->allowances->JKK = ( $this->result->earnings->gross * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+                    if ($this->employee->gapok < $this->provisions->state->highestWage) {
 
-                } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JKK = ( $this->employee->gapok * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
 
-                    $this->company->allowances->JKK = ( $this->provisions->state->highestWage * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+                        $this->employee->allowances->JKK = ( $this->employee->gapok * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
 
-                    $this->employee->allowances->JKK = ( $this->provisions->state->highestWage * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+                    } elseif ($this->employee->gapok >= $this->provisions->state->provinceMinimumWage && $this->employee->gapok >= $this->provisions->state->highestWage) {
+
+                        $this->company->allowances->JKK = ( $this->provisions->state->highestWage * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+
+                        $this->employee->allowances->JKK = ( $this->provisions->state->highestWage * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+                    }
+                }else{
+
+                    if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
+
+                        $this->company->allowances->JKK = ( $this->result->earnings->gross * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+
+                        $this->employee->allowances->JKK = ( $this->result->earnings->gross * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+
+                    } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
+
+                        $this->company->allowances->JKK = ( $this->provisions->state->highestWage * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+
+                        $this->employee->allowances->JKK = ( $this->provisions->state->highestWage * ($this->provisions->state->getJKKRiskGradePercentage($this->provisions->company->riskGrade) / 100) );
+                    }
                 }
             }
+            
 
             if ($this->provisions->company->JKM === true) {
-                if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
-                    $this->company->allowances->JKM = ( $this->result->earnings->gross * (0.30 / 100) );
-                    $this->employee->allowances->JKM = ( $this->result->earnings->gross * (0.30 / 100) );
-                } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
-                    $this->company->allowances->JKM = ( $this->provisions->state->highestWage * (0.30 / 100) );
-                    $this->employee->allowances->JKM = ( $this->provisions->state->highestWage * (0.30 / 100) );
+                if($this->employee->prorate === true){
+
+                    if ($this->employee->gapok < $this->provisions->state->highestWage) {
+                        $this->company->allowances->JKM = ( $this->employee->gapok * (0.30 / 100) );
+                        $this->employee->allowances->JKM = ( $this->employee->gapok * (0.30 / 100) );
+                    } elseif ($this->employee->gapok >= $this->provisions->state->provinceMinimumWage && $this->employee->gapok >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JKM = ( $this->provisions->state->highestWage * (0.30 / 100) );
+                        $this->employee->allowances->JKM = ( $this->provisions->state->highestWage * (0.30 / 100) );
+                    }
+
+                }else{
+                    if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
+                        $this->company->allowances->JKM = ( $this->result->earnings->gross * (0.30 / 100) );
+                        $this->employee->allowances->JKM = ( $this->result->earnings->gross * (0.30 / 100) );
+                    } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JKM = ( $this->provisions->state->highestWage * (0.30 / 100) );
+                        $this->employee->allowances->JKM = ( $this->provisions->state->highestWage * (0.30 / 100) );
+                    }
+
                 }
+               
             }
 
             if ($this->provisions->company->JHT === true) {
-                if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
-                    $this->company->allowances->JHT = ( $this->result->earnings->gross * (3.7 / 100) );
-                    $this->employee->allowances->JHT = ( $this->result->earnings->gross * (3.7 / 100) );
-                    $this->employee->deductions->JHT = ( $this->result->earnings->gross * (2 / 100));
-                } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
-                    $this->company->allowances->JHT = ( $this->provisions->state->highestWage * (3.7 / 100));
-                    $this->employee->allowances->JHT = ( $this->provisions->state->highestWage * (3.7 / 100));
-                    $this->employee->deductions->JHT = ( $this->provisions->state->highestWage * (2 / 100));
+                if($this->employee->prorate === true){
+
+                    if ($this->employee->gapok < $this->provisions->state->highestWage) {
+                        $this->company->allowances->JHT = ( $this->employee->gapok  * (3.7 / 100) );
+                        $this->employee->allowances->JHT = ( $this->employee->gapok  * (3.7 / 100) );
+                        $this->employee->deductions->JHT = ( $this->employee->gapok  * (2 / 100));
+                    } elseif ($this->employee->gapok  >= $this->provisions->state->provinceMinimumWage && $this->employee->gapok  >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JHT = ( $this->provisions->state->highestWage * (3.7 / 100));
+                        $this->employee->allowances->JHT = ( $this->provisions->state->highestWage * (3.7 / 100));
+                        $this->employee->deductions->JHT = ( $this->provisions->state->highestWage * (2 / 100));
+                    }
+
+                }else{
+                    if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
+                        $this->company->allowances->JHT = ( $this->result->earnings->gross * (3.7 / 100) );
+                        $this->employee->allowances->JHT = ( $this->result->earnings->gross * (3.7 / 100) );
+                        $this->employee->deductions->JHT = ( $this->result->earnings->gross * (2 / 100));
+                    } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JHT = ( $this->provisions->state->highestWage * (3.7 / 100));
+                        $this->employee->allowances->JHT = ( $this->provisions->state->highestWage * (3.7 / 100));
+                        $this->employee->deductions->JHT = ( $this->provisions->state->highestWage * (2 / 100));
+                    }
+
                 }
+                
             }
 
             if ($this->provisions->company->JIP === true) {
-                if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
-                    $this->employee->allowances->JIP = ( $this->result->earnings->gross * (2 / 100) );
-                    $this->company->allowances->JIP = ( $this->result->earnings->gross * (2 / 100) );
-                    $this->employee->deductions->JIP = ( $this->result->earnings->gross * (1 / 100) );
 
-                } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
-                    $this->company->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
-                    $this->employee->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
-                    $this->employee->deductions->JIP = ( $this->provisions->state->highestWage * (1 / 100) );
+                if($this->employee->prorate === true){
+                    if ($this->employee->gapok  < $this->provisions->state->highestWage) {
+                        $this->employee->allowances->JIP = ( $this->employee->gapok  * (2 / 100) );
+                        $this->company->allowances->JIP = ( $this->employee->gapok  * (2 / 100) );
+                        $this->employee->deductions->JIP = ( $this->employee->gapok  * (1 / 100) );
+                    
+                    } elseif ($this->employee->gapok  >= $this->provisions->state->provinceMinimumWage && $this->employee->gapok  >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
+                        $this->employee->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
+                        $this->employee->deductions->JIP = ( $this->provisions->state->highestWage * (1 / 100) );
+                    }
+                }else{
+                    if ($this->result->earnings->gross < $this->provisions->state->highestWage) {
+                        $this->employee->allowances->JIP = ( $this->result->earnings->gross * (2 / 100) );
+                        $this->company->allowances->JIP = ( $this->result->earnings->gross * (2 / 100) );
+                        $this->employee->deductions->JIP = ( $this->result->earnings->gross * (1 / 100) );
+    
+                    } elseif ($this->result->earnings->gross >= $this->provisions->state->provinceMinimumWage && $this->result->earnings->gross >= $this->provisions->state->highestWage) {
+                        $this->company->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
+                        $this->employee->allowances->JIP = ( $this->provisions->state->highestWage * (2 / 100) );
+                        $this->employee->deductions->JIP = ( $this->provisions->state->highestWage * (1 / 100) );
+                    }
                 }
+                
             }
 
             } else {
@@ -376,11 +454,25 @@ class PayrollCalculator
 
             if( $this->provisions->company->calculateBPJSKesehatan ){
 
-                if ($this->result->earnings->base < $this->provisions->company->highestWageBPJSKesehatan) {
-                    $this->employee->nonTaxDeductions->BPJSKesehatan = $this->result->earnings->base * (1 / 100);
-                } else {
-                    $this->employee->nonTaxDeductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
+                if($this->employee->prorate === true){
+
+                    if ($this->employee->gapok < $this->provisions->company->highestWageBPJSKesehatan) {
+                        $this->employee->nonTaxDeductions->BPJSKesehatan = $this->employee->gapok * (1 / 100);
+                    } else {
+                        $this->employee->nonTaxDeductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
+                    }
+
+                }else{
+
+                    if ($this->result->earnings->base < $this->provisions->company->highestWageBPJSKesehatan) {
+                        $this->employee->nonTaxDeductions->BPJSKesehatan = $this->result->earnings->base * (1 / 100);
+                    } else {
+                        $this->employee->nonTaxDeductions->BPJSKesehatan = $this->provisions->company->highestWageBPJSKesehatan * (1 / 100);
+                    }
+
                 }
+
+               
 
             } else {
 
@@ -419,13 +511,16 @@ class PayrollCalculator
             $this->result->earnings->grossFacility = $this->result->earnings->total_base + $this->company->allowances->BPJSKesehatan +  $this->company->allowances->JKK + $this->company->allowances->JKM + $this->company->allowances->JHT + $this->company->allowances->JIP + $this->employee->nonTaxAllowances->fasilitas; //
             // biaya jabatan , jHT, jip = pengurang
 
-            // print_r([
+            // dd([
             //     $monthlyPositionTax,
-            //     // $this->result->earnings->base,
-            //     // $this->result->earnings->gross,
+            //     $this->result->earnings->grossFacility,
+            //     $this->result->earnings->base,
+            //     $this->result->earnings->gross,
             //     $this->result->earnings->base + $this->result->allowances->getSum(),
-            //     // $this->result->deductions,
+            //     $this->result->deductions,
             //     $nett,
+            //     $this->result->allowances->getSum(),
+            //     $this->result->deductions->getSum(),
             //     $this->result->earnings->nett,
             //     $this->result->earnings->monthlyPositionTax
             // ]); die;
