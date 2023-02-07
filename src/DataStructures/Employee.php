@@ -26,6 +26,18 @@ class Employee
      * @var bool
      */
     public $permanentStatus = true;
+
+
+    
+    public $prorate = false;
+
+
+
+    public $actual = 22;
+
+
+
+    public $gapok = 0;
     
     /**
      * Employee::$maritalStatus
