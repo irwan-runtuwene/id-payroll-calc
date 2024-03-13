@@ -30,7 +30,7 @@
     "wiki": "https://github.com/irwan-runtuwene/id-payroll-calculator/wiki"
   },
   "require": {
-    "php": "^7.2.0",
+    "php": "^8.0.0",
     "o2system/spl": "*"
   },
   "autoload": {
